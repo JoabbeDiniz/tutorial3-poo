@@ -28,6 +28,11 @@ public class Livro {
 	public String getCategoria() {
 		return categoria;
 	}
+
+	@Override
+	public String toString() {
+		return "Livro [codigo=" + codigo + ", titulo=" + titulo + ", autor=" + autor + ", categoria=" + categoria + "]";
+	}
 	
 
 }
