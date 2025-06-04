@@ -17,6 +17,8 @@ public class Main {
 		livros.add(new Livro("0001", "livro1", "autor1", "comédia"));
 		livros.add(new Livro("0002", "livro2", "autor2", "drama"));
 		livros.add(new Livro("0003", "livro3", "autor3", "terror"));
+		
+		List<Emprestimo> emprestimos = new ArrayList<>();
 
 		Scanner s = new Scanner(System.in);
 		menu();
@@ -25,7 +27,7 @@ public class Main {
 		while (opcao != 0) {
 			try {
 				if (opcao == 1) {
-					login(s, usuarios, livros);
+					login(s, usuarios, livros, emprestimos);
 				} else {
 					throw new RuntimeException("Opção inválida!");
 				}
@@ -50,7 +52,7 @@ public class Main {
 
 	}
 
-	private static void login(Scanner s, List<Usuario> usuarios, List<Livro> livros) {
+	private static void login(Scanner s, List<Usuario> usuarios, List<Livro> livros, List<Emprestimo> emprestimos) {
 		System.out.print("Escreva sua matrícula:");
 		String matricula = s.next();
 		System.out.print("Escreva sua senha:");
@@ -60,6 +62,7 @@ public class Main {
 		for (Usuario u : usuarios) {
 			if (matricula.equals(u.getMatricula()) && senha.equals(u.getSenha())) {
 				usuario = u;
+				break;
 			}
 		}
 		if (usuario == null) {
@@ -70,7 +73,7 @@ public class Main {
 		} else if (usuario instanceof Professor) {
 			menuProfessor();
 		} else if (usuario instanceof Bibliotecario) {
-			menuBibliotecario();
+			menuBibliotecario(livros, s, usuarios, emprestimos);
 		} else if (usuario instanceof Administrador) {
 			menuAdministrador();
 		}
@@ -114,15 +117,37 @@ public class Main {
 		System.out.print("Digite o número de acordo com o que deseja fazer:");
 	}
 
-	private static void menuBibliotecario() {
-		System.out.println("Portal do bibliotecário");
-		System.out.println("1. Buscar livros");
-		System.out.println("2. Reservar livros");
-		System.out.println("3. Renovar empréstimos");
-		System.out.println("4. Registrar empréstimo");
-		System.out.println("5. Registrar devolução");
-		System.out.println("0. Sair");
-		System.out.print("Digite o número de acordo com o que deseja fazer:");
+	private static void menuBibliotecario(List<Livro> livros, Scanner s, List<Usuario> usuarios, List<Emprestimo> emprestimos) {
+		while (true) {
+			try {
+				System.out.println("Portal do bibliotecário");
+				System.out.println("1. Buscar livros");
+				System.out.println("2. Reservar livros");
+				System.out.println("3. Renovar empréstimos");
+				System.out.println("4. Registrar empréstimo");
+				System.out.println("5. Registrar devolução");
+				System.out.println("0. Sair");
+				System.out.print("Digite o número de acordo com o que deseja fazer:");
+				int opcao = s.nextInt();
+				if (opcao == 1) {
+					buscarLivro(livros, s);
+				} else if (opcao == 2) {
+					reservarLivro();
+				} else if (opcao == 3) {
+					renovarEmprestimo();
+				} else if (opcao == 4){
+					registrarEmprestimo(livros, s, usuarios, emprestimos);
+				}
+				else if (opcao == 0) {
+					return;
+				} else {
+					throw new RuntimeException("Opção inválida!");
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+
+			}
+		}
 	}
 
 	private static void menuAdministrador() {
@@ -183,5 +208,48 @@ public class Main {
 	private static void renovarEmprestimo() {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private static void registrarEmprestimo(List<Livro> livros, Scanner s, List<Usuario> usuarios, List<Emprestimo> emprestimos) {
+		System.out.print("Digite a matrícula do usuário:");
+		String matricula = s.next();
+		System.out.print("Digite o código do livro:");
+		String codigo = s.next();
+		
+		Usuario usuario = null;
+		System.out.println();
+		for (Usuario u : usuarios) {
+			if (matricula.equals(u.getMatricula())) {
+				usuario = u;
+				break;
+			}
+		}
+		
+		if (usuario == null) {
+			throw new RuntimeException("O usuário não existe!");
+		}
+		
+		if (usuario.getNumEmprestimos() == 5) {
+			throw new RuntimeException("O usuário não pode pedir mais empréstimos!");
+		}
+		
+		Livro livro = null;
+		System.out.println();
+		for (Livro l : livros) {
+			if (codigo.equals(l.getCodigo())) {
+				livro = l;
+				break;
+			}
+		}
+		
+		if (livro == null) {
+			throw new RuntimeException("O livro não existe!");
+		}
+		
+		emprestimos.add(new Emprestimo(usuario, livro));
+		
+		usuario.adicionarEmprestimo();
+		
+		System.out.println("Emprestimo realizado com sucesso!");
 	}
 }
